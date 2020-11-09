@@ -8,7 +8,7 @@ public class Demo {
     static String[] cyrill_words_lower;
     static String[] latin_words_upper;
     static String[] cyrill_words_upper;
-
+    static boolean isResourceFolder = false;
     static int index = 0;
 
     public static void main(String[] args) throws Exception {
@@ -27,14 +27,19 @@ public class Demo {
             Scanner scanner = new Scanner(System.in);
             System.out.println("1. KRILL => LATIN");
             System.out.println("2. LATIN => KRILL");
+            System.out.println("3. EXIT");
 
             int krillLatin = scanner.nextInt();
             if (krillLatin == 1 || krillLatin == 2) {
 
                 boolean b = true;
                 while (b) {
-                    System.out.println(" + Browse File  - In Resource Folder");
+
+                    System.out.println(" + Browse File");
+                    if (!isResourceFolder)
+                        System.out.println(" - In Resource Folder");
                     String choice = scanner.next();
+
 
                     if (choice.equals("+")) {
                         b = false;
@@ -78,17 +83,35 @@ public class Demo {
                                         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
                                         if (krillLatin == 1) {
                                             // Krill => Latin
+                                            File file1;
+                                            if (isResourceFolder) {
+                                                file1 = new File("src/main/resources/latin" + "/" + "TextLatin.txt");
+                                            } else {
+                                                file1 = new File(path + "\\" + "TextLatin.txt");
+                                            }
 
-                                            File file1 = new File(path + "\\" + "TextLatin.txt");
                                             file1.createNewFile();
 
                                             krillToLatin(bufferedReader, file1);
+                                            System.out.println("File is done!\n");
+                                            isResourceFolder = false;
+                                            bufferedReader.close();
                                         }
                                         if (krillLatin == 2) {
                                             // Latin => Krill
-                                            File file1 = new File(path + "\\" + "TextKrill.txt");
+
+                                            File file1;
+                                            if (isResourceFolder) {
+                                                file1 = new File("src/main/resources/krill" + "/" + "TextKrill.txt");
+                                            } else {
+                                                file1 = new File(path + "\\" + "TextKrill.txt");
+                                            }
                                             file1.createNewFile();
+
                                             latinToKrill(bufferedReader, file1);
+                                            System.out.println("File is done!\n");
+                                            isResourceFolder = false;
+                                            bufferedReader.close();
                                         }
                                     } else {
 
@@ -100,12 +123,50 @@ public class Demo {
                                 System.out.println("'" + choice + "' is not recognized as an internal or external command");
                             }
                         }
-                    } else {
+                    } else if (choice.equals("-")) {
+                        if (krillLatin == 1) {
+                            File file = new File("src/main/resources/krill/krill.txt");
+                            if (file.exists()) {
+                                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 
+                                file = new File("src/main/resources/latin/latin.txt");
+                                if (!file.exists()) {
+                                    krillToLatin(bufferedReader, file);
+                                    System.out.println("File is done!\n");
+                                    isResourceFolder = false;
+                                } else {
+                                    System.out.println("The File is already exists!\n");
+                                }
+                                bufferedReader.close();
+
+                            } else {
+                                System.out.println("File not found!");
+                                isResourceFolder = true;
+                            }
+                        } else {
+                            File file = new File("src/main/resources/latin/latin.txt");
+                            if (file.exists()) {
+                                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+
+                                file = new File("src/main/resources/krill/krill.txt");
+                                if (!file.exists()) {
+                                    latinToKrill(bufferedReader, file);
+                                    System.out.println("File is done!\n");
+                                    isResourceFolder = false;
+                                } else {
+                                    System.out.println("The File is already exists!\n");
+                                }
+                                bufferedReader.close();
+                            } else {
+                                System.out.println("File not found!");
+                                isResourceFolder = true;
+                            }
+                        }
                     }
                 }
+            } else if (krillLatin == 3) {
+                break;
             }
-
         }
     }
 
