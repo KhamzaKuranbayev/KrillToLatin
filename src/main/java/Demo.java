@@ -72,11 +72,14 @@ public class Demo {
                             File file1 = new File(path + "\\" + "TextLatin.txt");
                             file1.createNewFile();
 
-                            krillToLatin(bufferedReader, file1, cyrill, latin);
+                            krillToLatin(bufferedReader, file1);
                         }
+                        //  if  block  inside added ------------------
                         if (krillLatin == 2) {
                             // Latin => Krill
-                            latinToKrill(bufferedReader);
+                            File file2=new File(path+"\\"+"TextCyrill.txt");
+                            file2.createNewFile();
+                            latinToKrill(bufferedReader,file2);
                         }
 
                     } else {
@@ -183,11 +186,50 @@ public class Demo {
         return result_line;
     }
 
-    private static void latinToKrill(BufferedReader bufferedReader) {
+    private static void latinToKrill(BufferedReader bufferedReader,File file2) {
+        try (OutputStream outputStream = new FileOutputStream(file2)) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String line2 = line.trim();
+                if (!line2.isEmpty()) {
+
+                    line = replaceIfHasWordsInArray("latin", line);
+
+                    for (int i = 0; i < line.length();) {
+                        String twoDigit = "";
+                        if (line.substring(i).length() >= 2) {
+                            twoDigit = line.substring(i, i + 2); // amaliyot darsi
+                        }
+                        String letter = String.valueOf(line.charAt(i));
+
+                        if (hasLetterInArray("latin", twoDigit)) {
+                            outputStream.write(getKirilFromArray(twoDigit).getBytes());
+                            i += 2;
+                            continue;
+                        } else if (hasLetterInArray("latin", letter)) {
+                            outputStream.write(getKirilFromArray(letter).getBytes());
+                        } else {
+                            outputStream.write(letter.getBytes());
+                        }
+                        i++;
+                    }
+                    outputStream.write("\n".getBytes());
+                } else {
+                    outputStream.write("\n".getBytes());
+                }
+            }
+
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
-    private static void krillToLatin(BufferedReader bufferedReader, File file1, String[] krill, String[] latin) throws IOException {
+    private static void krillToLatin(BufferedReader bufferedReader, File file1) throws IOException {
         OutputStream outputStream = new FileOutputStream(file1, true);
 
         String line;
@@ -200,7 +242,7 @@ public class Demo {
                 for (int i = 0; i < line.length(); i++) {
                     String letter = String.valueOf(line.charAt(i));
                     if (hasLetterInArray("cyrill", letter)) {
-                        outputStream.write(getLatinFromArray(letter, krill, latin).getBytes());
+                        outputStream.write(getLatinFromArray(letter).getBytes());
                     } else {
                         outputStream.write(letter.getBytes());
                     }
@@ -247,14 +289,24 @@ public class Demo {
         return false;
     }
 
-    private static String getLatinFromArray(String letter, String[] krill, String[] latin) {
+    private static String getLatinFromArray(String letter) {
         int index = 0;
-        for (int i = 0; i < krill.length; i++) {
-            if (krill[i].equals(letter))
+        for (int i = 0; i < cyrill.length; i++) {
+            if (cyrill[i].equals(letter))
                 index = i;
         }
 
         return latin[index];
+    }
+    // Method added ------------------------------------------tring[] latin, String[]cyrill
+    private static String getKirilFromArray(String letter) {
+        int index = 0;
+        for (int i = 0; i < latin.length; i++) {
+            if (latin[i].equals(letter))
+                index = i;
+        }
+
+        return cyrill[index];
     }
 
     private static void printDataInFolder(File file) {
